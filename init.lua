@@ -642,7 +642,7 @@ do
       ---@type lspconfig.settings.lua_ls
       settings = {
         Lua = {
-          format = { enable = false }, -- Disable formatting (formatting is done by stylua)
+          format = { enable = true  }, -- Disable formatting (formatting is done by stylua)
         },
       },
     },
