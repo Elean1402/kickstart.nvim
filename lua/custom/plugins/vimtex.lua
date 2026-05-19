@@ -7,7 +7,11 @@ vim.pack.add({
 })
 
 vim.g.maplocalleader = ","
-vim.g.vimtex_view_method = "skim"
+if vim.fn.has('mac') == 1 then
+  vim.g.vimtex_view_method = 'skim'
+else
+  vim.g.vimtex_view_method = 'zathura'
+end
 vim.g.vimtex_compiler_method = "latexmk"
 
 vim.g.vimtex_compiler_latexmk = {
