@@ -499,7 +499,6 @@ do
         signature = { enabled = true },
     }
 end
-
 -- ============================================================
 -- SECTION 5: LSP
 -- LSP keymaps, server configuration, Mason tools installations
@@ -726,6 +725,7 @@ do
 
     vim.keymap.set({ 'n', 'v' }, '<leader>f', function() require('conform').format { async = true } end, { desc = '[F]ormat buffer' })
 end
+
 -- ============================================================
 -- SECTION 8: TREESITTER
 -- Parser installation, syntax highlighting, folds, indentation
