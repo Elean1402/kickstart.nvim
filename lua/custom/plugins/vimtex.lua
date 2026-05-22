@@ -35,6 +35,7 @@ end
 -- Compiler
 vim.g.vimtex_compiler_method = 'latexmk'
 vim.g.vimtex_compiler_latexmk = {
+    out_dir = 'build',
     continuous = 1,
     callback = 1,
     options = {
@@ -93,6 +94,7 @@ vim.api.nvim_create_autocmd('FileType', {
     end,
 })
 
+vim.env.RUST_BACKTRACE = '1'
 vim.lsp.config('texlab', {
     settings = {
         texlab = {
