@@ -148,6 +148,14 @@ do
     -- vim.keymap.set("n", "<C-S-j>", "<C-w>J", { desc = "Move window to the lower" })
     -- vim.keymap.set("n", "<C-S-k>", "<C-w>K", { desc = "Move window to the upper" })
 
+    -- Paragraph jumps on QWERTZ home row: ö previous, ä next
+    vim.keymap.set({ 'n', 'x', 'o' }, 'ö', '{', { desc = 'Jump to previous paragraph' })
+    vim.keymap.set({ 'n', 'x', 'o' }, 'ä', '}', { desc = 'Jump to next paragraph' })
+
+    -- Diagnostic jumps on Ö/Ä (replaces AltGr-heavy [d/]d)
+    vim.keymap.set('n', 'Ö', function() vim.diagnostic.jump { count = -1 } end, { desc = 'Jump to previous diagnostic' })
+    vim.keymap.set('n', 'Ä', function() vim.diagnostic.jump { count = 1 } end, { desc = 'Jump to next diagnostic' })
+
     -- [[ Basic Autocommands ]]
     --  See `:help lua-guide-autocommands`
 
@@ -265,17 +273,17 @@ do
     --
     -- See `:help gitsigns` to understand what each configuration key does.
     -- Adds git related signs to the gutter, as well as utilities for managing changes
-    vim.pack.add { gh 'lewis6991/gitsigns.nvim' }
-    require('gitsigns').setup {
-        signs = {
-            add = { text = '+' }, ---@diagnostic disable-line: missing-fields
-            change = { text = '~' }, ---@diagnostic disable-line: missing-fields
-            delete = { text = '_' }, ---@diagnostic disable-line: missing-fields
-            topdelete = { text = '‾' }, ---@diagnostic disable-line: missing-fields
-            changedelete = { text = '~' }, ---@diagnostic disable-line: missing-fields
-        },
-    }
-
+    -- vim.pack.add { gh 'lewis6991/gitsigns.nvim' }
+    -- require('gitsigns').setup {
+    --     signs = {
+    --         add = { text = '+' }, ---@diagnostic disable-line: missing-fields
+    --         change = { text = '~' }, ---@diagnostic disable-line: missing-fields
+    --         delete = { text = '_' }, ---@diagnostic disable-line: missing-fields
+    --         topdelete = { text = '‾' }, ---@diagnostic disable-line: missing-fields
+    --         changedelete = { text = '~' }, ---@diagnostic disable-line: missing-fields
+    --     },
+    -- }
+    --
     -- Useful plugin to show you pending keybinds.
     vim.pack.add { gh 'folke/which-key.nvim' }
     require('which-key').setup {
@@ -527,7 +535,6 @@ do
         clangd = {},
         gopls = {},
         pyright = {},
-        rust_analyzer = {},
         zls = {},
         texlab = {},
         --
@@ -593,7 +600,8 @@ do
     -- You can press `g?` for help in this menu.
     local ensure_installed = vim.tbl_keys(servers or {})
     vim.list_extend(ensure_installed, {
-        -- You can add other tools here that you want Mason to install
+        'rust-analyzer', -- used by rustaceanvim, not enabled directly
+        'codelldb', -- DAP adapter for rust
     })
 
     require('mason-tool-installer').setup { ensure_installed = ensure_installed }
@@ -618,6 +626,7 @@ do
             local enabled_filetypes = {
                 lua = true,
                 python = true,
+                rust = true,
             }
             if enabled_filetypes[vim.bo[bufnr].filetype] then
                 return { timeout_ms = 500 }
@@ -630,7 +639,7 @@ do
         },
         -- You can also specify external formatters in here.
         formatters_by_ft = {
-            -- rust = { 'rustfmt' },
+            rust = { 'rustfmt' },
             -- Conform can also run multiple formatters sequentially
             -- python = { "isort", "black" },
             --
@@ -687,9 +696,9 @@ do
             --
             -- See `:help blink-cmp-config-keymap` for defining your own keymap
             preset = 'default',
-            ['<C-j>'] = { 'accept', 'fallback' },
-            ['<Tab>'] = { 'select_next', 'fallback' },
-            ['<S-Tab>'] = { 'select_prev', 'fallback' },
+            ['<Tab>'] = { 'accept', 'fallback' },
+            ['<C-j>'] = { 'select_next', 'fallback' },
+            ['<C-k>'] = { 'select_prev', 'fallback' },
 
             -- For more advanced Luasnip keymaps (e.g. selecting choice nodes, expansion) see:
             --    https://github.com/L3MON4D3/LuaSnip?tab=readme-ov-file#keymaps
@@ -740,7 +749,7 @@ do
     vim.pack.add { { src = gh 'nvim-treesitter/nvim-treesitter', version = 'main' } }
 
     -- Ensure basic parsers are installed
-    local parsers = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc' }
+    local parsers = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc', 'rust', 'toml' }
     require('nvim-treesitter').install(parsers)
 
     ---@param buf integer
@@ -813,8 +822,30 @@ do
     --
     --  Uncomment the following line and add your plugins to `lua/custom/plugins/*.lua` to get going.
     require 'custom.plugins.vimtex'
-    require 'custom.plugins.trouble'
-    require 'custom.plugins.todo-comments'
+end
+
+-- ============================================================
+-- SECTION 10: RUST
+-- rustaceanvim, crates.nvim
+-- ============================================================
+do
+    -- vim.g.rustaceanvim must be set before rustaceanvim loads (auto-attaches on rust filetype).
+    vim.g.rustaceanvim = {
+        server = {
+            default_settings = {
+                ['rust-analyzer'] = {
+                    check = { command = 'clippy' },
+                    cargo = { allFeatures = true },
+                    procMacro = { enable = true },
+                    inlayHints = { closingBraceHints = { minLines = 10 } },
+                },
+            },
+        },
+    }
+    vim.pack.add { gh 'mrcjkb/rustaceanvim' }
+
+    vim.pack.add { gh 'saecki/crates.nvim' }
+    require('crates').setup {}
 end
 
 -- The line beneath this is called `modeline`. See `:help modeline`
