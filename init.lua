@@ -414,6 +414,23 @@ do
 
     -- Search Neovim config files
     vim.keymap.set('n', '<leader>sn', function() fzf.files { cwd = vim.fn.stdpath 'config' } end, { desc = '[S]earch [N]eovim files' })
+
+    -- [[ harpoon ]] — pin a handful of files and jump between them by index.
+    -- Workflow: `<leader>a` to pin the current file, `<C-e>` to see the list,
+    -- `<leader>1`..`<leader>4` to jump directly.
+    vim.pack.add {
+        gh 'nvim-lua/plenary.nvim', -- harpoon dependency; idempotent if loaded elsewhere
+        { src = gh 'ThePrimeagen/harpoon', version = 'harpoon2' },
+    }
+    local harpoon = require 'harpoon'
+    harpoon:setup()
+
+    vim.keymap.set('n', '<leader>a', function() harpoon:list():add() end, { desc = 'Harpoon [A]dd file' })
+    vim.keymap.set('n', '<C-e>', function() harpoon.ui:toggle_quick_menu(harpoon:list()) end, { desc = 'Harpoon menu' })
+    vim.keymap.set('n', '<leader>1', function() harpoon:list():select(1) end, { desc = 'Harpoon file 1' })
+    vim.keymap.set('n', '<leader>2', function() harpoon:list():select(2) end, { desc = 'Harpoon file 2' })
+    vim.keymap.set('n', '<leader>3', function() harpoon:list():select(3) end, { desc = 'Harpoon file 3' })
+    vim.keymap.set('n', '<leader>4', function() harpoon:list():select(4) end, { desc = 'Harpoon file 4' })
 end
 
 -- ============================================================
@@ -791,6 +808,15 @@ do
             end
         end,
     })
+
+    -- [[ treesitter-context ]] — sticky context line at the top of the buffer
+    -- showing the enclosing function/class/scope while you scroll.
+    vim.pack.add { gh 'nvim-treesitter/nvim-treesitter-context' }
+    require('treesitter-context').setup {
+        max_lines = 3, -- limit how tall the sticky header can grow
+        multiline_threshold = 1, -- collapse multi-line declarations to a single line
+        mode = 'cursor', -- update based on cursor position (less jumpy than 'topline')
+    }
 end
 
 -- ============================================================
