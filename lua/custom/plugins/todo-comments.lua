@@ -34,9 +34,12 @@ vim.keymap.set('n', '<leader>ct', insert_todo 'TODO', { desc = 'Insert TODO' })
 vim.keymap.set('n', '<leader>cf', insert_todo 'FIXME', { desc = 'Insert FIXME' })
 vim.keymap.set('n', '<leader>ch', insert_todo 'HACK', { desc = 'Insert HACK' })
 vim.keymap.set('n', '<leader>cn', insert_todo 'NOTE', { desc = 'Insert NOTE' })
--- Jump between TODOs
+-- Jump between TODOs (current buffer)
 vim.keymap.set('n', '<leader>tn', function() require('todo-comments').jump_next() end, { desc = 'Next todo' })
 vim.keymap.set('n', '<leader>tp', function() require('todo-comments').jump_prev() end, { desc = 'Prev todo' })
+
+-- Fuzzy-pick TODOs across the whole project
+vim.keymap.set('n', '<leader>st', '<cmd>TodoFzfLua<cr>', { desc = '[S]earch [T]odos (project)' })
 
 -- Open todos in trouble.nvim (works since we load trouble too)
 vim.keymap.set('n', '<leader>xt', '<cmd>Trouble todo toggle<cr>', { desc = 'Todo (Trouble)' })

@@ -19,7 +19,7 @@ do
     --  See `:help vim.o`
     -- NOTE: You can change these options as you wish!
     --  For more options, you can see `:help option-list`
-
+    vim.o.colorcolumn = '80'
     -- Make line numbers default
     vim.o.number = true
     -- You can also add relative line numbers, to help with jumping.
@@ -269,21 +269,8 @@ do
     -- since otherwise the icons won't display properly.
     if vim.g.have_nerd_font then vim.pack.add { gh 'nvim-tree/nvim-web-devicons' } end
 
-    -- Here is a more advanced configuration example that passes options to `gitsigns.nvim`
-    --
-    -- See `:help gitsigns` to understand what each configuration key does.
-    -- Adds git related signs to the gutter, as well as utilities for managing changes
-    -- vim.pack.add { gh 'lewis6991/gitsigns.nvim' }
-    -- require('gitsigns').setup {
-    --     signs = {
-    --         add = { text = '+' }, ---@diagnostic disable-line: missing-fields
-    --         change = { text = '~' }, ---@diagnostic disable-line: missing-fields
-    --         delete = { text = '_' }, ---@diagnostic disable-line: missing-fields
-    --         topdelete = { text = '‾' }, ---@diagnostic disable-line: missing-fields
-    --         changedelete = { text = '~' }, ---@diagnostic disable-line: missing-fields
-    --     },
-    -- }
-    --
+    -- gitsigns is configured in `lua/kickstart/plugins/gitsigns.lua`.
+
     -- Useful plugin to show you pending keybinds.
     vim.pack.add { gh 'folke/which-key.nvim' }
     require('which-key').setup {
@@ -295,6 +282,8 @@ do
             { '<leader>s', group = '[S]earch', mode = { 'n', 'v' } },
             { '<leader>t', group = '[T]oggle' },
             { '<leader>h', group = 'Git [H]unk', mode = { 'n', 'v' } }, -- Enable gitsigns recommended keymaps first
+            { '<leader>c', group = '[C]omment/TODO' },
+            { '<leader>x', group = 'Trouble' },
             { 'gr', group = 'LSP Actions', mode = { 'n' } },
         },
     }
@@ -318,9 +307,7 @@ do
     -- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
     vim.cmd.colorscheme 'tokyonight-night'
 
-    -- Highlight todo, notes, etc in comments
-    vim.pack.add { gh 'folke/todo-comments.nvim' }
-    require('todo-comments').setup { signs = false }
+    -- todo-comments is configured in `lua/custom/plugins/todo-comments.lua`.
 
     -- [[ mini.nvim ]]
     --  A collection of various small independent plugins/modules
@@ -363,6 +350,11 @@ do
 
     -- ... and there is more!
     --  Check out: https://github.com/nvim-mini/mini.nvim
+
+    -- [[ undotree ]] — visualize and navigate the undo tree
+    vim.pack.add { gh 'mbbill/undotree' }
+    vim.g.undotree_SetFocusWhenToggle = 1
+    vim.keymap.set('n', '<leader>u', vim.cmd.UndotreeToggle, { desc = 'Toggle [U]ndotree' })
 end
 -- ============================================================
 -- SECTION 4: SEARCH & NAVIGATION
@@ -544,8 +536,6 @@ do
         -- But for many setups, the LSP (`ts_ls`) will work just fine
         -- ts_ls = {},
 
-        stylua = {}, -- Used to format Lua code
-
         -- Special Lua Config, as recommended by neovim help docs
         lua_ls = {
             on_init = function(client)
@@ -575,7 +565,7 @@ do
             ---@type lspconfig.settings.lua_ls
             settings = {
                 Lua = {
-                    format = { enable = true }, -- Disable formatting (formatting is done by stylua)
+                    format = { enable = false }, -- Formatting is done by stylua via conform
                 },
             },
         },
@@ -590,6 +580,11 @@ do
 
     -- Automatically install LSPs and related tools to stdpath for Neovim
     require('mason').setup {}
+    -- mason-lspconfig provides the LSP-name → Mason-package-name mapping that
+    -- mason-tool-installer relies on (e.g. `lua_ls` → `lua-language-server`).
+    -- `automatic_enable = false` so it doesn't double-enable servers we manually
+    -- configure via `vim.lsp.enable` below.
+    require('mason-lspconfig').setup { automatic_enable = false }
 
     -- Ensure the servers and tools above are installed
     --
@@ -600,6 +595,7 @@ do
     -- You can press `g?` for help in this menu.
     local ensure_installed = vim.tbl_keys(servers or {})
     vim.list_extend(ensure_installed, {
+        'stylua', -- Lua formatter, used by conform
         'rust-analyzer', -- used by rustaceanvim, not enabled directly
         'codelldb', -- DAP adapter for rust
     })
@@ -713,7 +709,7 @@ do
         completion = {
             -- By default, you may press `<c-space>` to show the documentation.
             -- Optionally, set `auto_show = true` to show the documentation after a delay.
-            documentation = { auto_show = false, auto_show_delay_ms = 500 },
+            documentation = { auto_show = true, auto_show_delay_ms = 500 },
         },
 
         sources = {
@@ -805,7 +801,8 @@ do
     -- The following comments only work if you have downloaded the kickstart repo, not just copy pasted the
     -- init.lua. If you want these files, they are in the repository, so you can just download them and
     -- place them in the correct locations.
-    vim.g.python3_host_prog = vim.fn.expand '~/.venv/neovim/bin/python'
+    local py = vim.fn.expand '~/.venv/neovim/bin/python'
+    if vim.uv.fs_stat(py) then vim.g.python3_host_prog = py end
     -- NOTE: Next step on your Neovim journey: Add/Configure additional plugins for Kickstart
     --
     --  Here are some example plugins that I've included in the Kickstart repository.
@@ -818,10 +815,8 @@ do
     -- require 'kickstart.plugins.neo-tree'
     require 'kickstart.plugins.gitsigns' -- adds gitsigns recommended keymaps
 
-    -- NOTE: You can add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
-    --
-    --  Uncomment the following line and add your plugins to `lua/custom/plugins/*.lua` to get going.
-    require 'custom.plugins.vimtex'
+    -- Loads every *.lua file in `lua/custom/plugins/` (see that dir's `init.lua`).
+    require 'custom.plugins'
 end
 
 -- ============================================================

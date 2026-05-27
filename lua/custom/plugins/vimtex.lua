@@ -1,11 +1,7 @@
--- vim.pack.add requires Neovim 0.11+
-vim.pack.add {
-    {
-        src = 'https://github.com/lervag/vimtex',
-        opt = true,
-    },
-}
+vim.pack.add { 'https://github.com/lervag/vimtex' }
 
+-- vimtex uses `,` as its <localleader>. Set this before any <localleader>
+-- mapping is created for vimtex.
 vim.g.maplocalleader = ','
 
 -- Syntax & concealment
@@ -94,7 +90,6 @@ vim.api.nvim_create_autocmd('FileType', {
     end,
 })
 
-vim.env.RUST_BACKTRACE = '1'
 vim.lsp.config('texlab', {
     settings = {
         texlab = {
