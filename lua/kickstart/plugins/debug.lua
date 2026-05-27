@@ -13,6 +13,7 @@ vim.pack.add {
   'https://github.com/mason-org/mason.nvim',
   'https://github.com/jay-babu/mason-nvim-dap.nvim',
   'https://github.com/leoluz/nvim-dap-go',
+  'https://github.com/mfussenegger/nvim-dap-python',
 }
 
 -- Basic debugging keymaps, feel free to change to your liking!
@@ -93,3 +94,57 @@ require('dap-go').setup {
     detached = vim.fn.has 'win32' == 0,
   },
 }
+
+-- ============================================================
+-- Rust / Zig (via codelldb)
+-- ============================================================
+-- codelldb is installed via Mason (see `ensure_installed` in init.lua).
+-- For Rust, the *recommended* path is `:RustLsp debuggables` — rustaceanvim
+-- auto-discovers Cargo targets. The raw config below lets <F5> work too for
+-- any binary you point it at, and is the primary path for Zig.
+
+local mason_path = vim.fn.stdpath 'data' .. '/mason'
+local codelldb_adapter = mason_path .. '/packages/codelldb/extension/adapter/codelldb'
+
+dap.adapters.codelldb = {
+  type = 'server',
+  port = '${port}',
+  executable = {
+    command = codelldb_adapter,
+    args = { '--port', '${port}' },
+  },
+}
+
+dap.configurations.rust = {
+  {
+    name = 'Launch (prompt for cargo binary)',
+    type = 'codelldb',
+    request = 'launch',
+    program = function() return vim.fn.input('Path to executable: ', vim.fn.getcwd() .. '/target/debug/', 'file') end,
+    cwd = '${workspaceFolder}',
+    stopOnEntry = false,
+  },
+}
+
+dap.configurations.zig = {
+  {
+    name = 'Launch (prompt for zig-out binary)',
+    type = 'codelldb',
+    request = 'launch',
+    program = function() return vim.fn.input('Path to executable: ', vim.fn.getcwd() .. '/zig-out/bin/', 'file') end,
+    cwd = '${workspaceFolder}',
+    stopOnEntry = false,
+  },
+}
+
+-- Convenience: rustaceanvim's debuggables picker (auto-discovers Cargo targets)
+vim.keymap.set('n', '<leader>dr', '<cmd>RustLsp debuggables<cr>', { desc = 'Debug: [R]ust debuggables' })
+
+-- ============================================================
+-- Python (via debugpy + nvim-dap-python)
+-- ============================================================
+-- debugpy is installed via Mason (see `ensure_installed` in init.lua).
+-- We point nvim-dap-python at Mason's bundled venv so it works regardless of
+-- the project's own virtualenv.
+local debugpy_python = mason_path .. '/packages/debugpy/venv/bin/python'
+require('dap-python').setup(debugpy_python)

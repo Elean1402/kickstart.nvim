@@ -614,7 +614,8 @@ do
     vim.list_extend(ensure_installed, {
         'stylua', -- Lua formatter, used by conform
         'rust-analyzer', -- used by rustaceanvim, not enabled directly
-        'codelldb', -- DAP adapter for rust
+        'codelldb', -- DAP adapter for rust / zig / c
+        'debugpy', -- DAP adapter for python (via nvim-dap-python)
     })
 
     require('mason-tool-installer').setup { ensure_installed = ensure_installed }
