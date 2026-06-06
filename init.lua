@@ -118,7 +118,11 @@ do
     }
 
     vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
-
+    vim.keymap.set('n', '<leader>rd', function()
+        vim.cmd.write()                         -- save first
+        local file = vim.fn.shellescape(vim.fn.expand('%:p'))
+        vim.cmd('botright 15split | terminal duckdb hotelkette.db < ' .. file)
+    end, { desc = 'Run SQL file in DuckDB' })
     -- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
     -- for people to discover. Otherwise, you normally need to press <C-\><C-n>, which
     -- is not what someone will guess without a bit more experience.
@@ -387,12 +391,12 @@ do
         group = vim.api.nvim_create_augroup('fzf-lsp-attach', { clear = true }),
         callback = function(event)
             local buf = event.buf
-            vim.keymap.set('n', 'grr', fzf.lsp_references, { buffer = buf, desc = '[G]oto [R]eferences' })
-            vim.keymap.set('n', 'gri', fzf.lsp_implementations, { buffer = buf, desc = '[G]oto [I]mplementation' })
+            vim.keymap.set('n', 'gr', fzf.lsp_references, { buffer = buf, desc = '[G]oto [R]eferences' })
+            vim.keymap.set('n', 'gi', fzf.lsp_implementations, { buffer = buf, desc = '[G]oto [I]mplementation' })
             vim.keymap.set('n', 'gd', fzf.lsp_definitions, { buffer = buf, desc = '[G]oto [D]efinition' })
             vim.keymap.set('n', 'gO', fzf.lsp_document_symbols, { buffer = buf, desc = 'Open Document Symbols' })
             vim.keymap.set('n', 'gW', fzf.lsp_live_workspace_symbols, { buffer = buf, desc = 'Open Workspace Symbols' })
-            vim.keymap.set('n', 'grt', fzf.lsp_typedefs, { buffer = buf, desc = '[G]oto [T]ype Definition' })
+            vim.keymap.set('n', 'gt', fzf.lsp_typedefs, { buffer = buf, desc = '[G]oto [T]ype Definition' })
         end,
     })
 
@@ -543,7 +547,9 @@ do
     local servers = {
         clangd = {},
         gopls = {},
-        pyright = {},
+        pyright = {
+            root_markers = { 'pyrightconfig.json', 'pyproject.toml', 'setup.py', 'setup.cfg', 'requirements.txt', 'Pipfile', '.git', '.venv' },
+        },
         zls = {},
         texlab = {},
         --
@@ -661,7 +667,12 @@ do
             -- javascript = { "prettierd", "prettier", stop_after_first = true },
         },
     }
-
+    vim.api.nvim_create_autocmd('FileType', {
+  pattern = 'markdown',
+  callback = function()
+    vim.diagnostic.enable(false, { bufnr = 0 })
+  end,
+})
     vim.keymap.set({ 'n', 'v' }, '<leader>f', function() require('conform').format { async = true } end, { desc = '[F]ormat buffer' })
 end
 

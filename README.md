@@ -74,7 +74,7 @@ file too - it's ignored in the kickstart repo to make maintenance easier, but
 it's recommended to track it in version control (see `:help vim.pack-lockfile`).
 
 #### Clone kickstart.nvim
-
+- [ ] test
 > [!NOTE]
 > If following the recommended step above (i.e., forking the repo), replace
 > `nvim-lua` with `<your_github_username>` in the commands below

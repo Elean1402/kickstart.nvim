@@ -25,7 +25,21 @@ vim.keymap.set('n', '<leader>b', function() require('dap').toggle_breakpoint() e
 vim.keymap.set('n', '<leader>B', function() require('dap').set_breakpoint(vim.fn.input 'Breakpoint condition: ') end, { desc = 'Debug: Set Breakpoint' })
 -- Toggle to see last session result. Without this, you can't see session output in case of unhandled exception.
 vim.keymap.set('n', '<F7>', function() require('dapui').toggle() end, { desc = 'Debug: See last session result.' })
-
+vim.keymap.set('n', '<leader>rp', function()
+    vim.cmd.write() -- save first
+    local file = vim.fn.shellescape(vim.fn.expand '%')
+    local cmd = ({
+        python = 'uv run ' .. file, -- uses the project's .venv automatically
+        lua = 'lua ' .. file,
+        sh = 'bash ' .. file,
+    })[vim.bo.filetype]
+    if not cmd then
+        vim.notify('No run command for filetype: ' .. vim.bo.filetype, vim.log.levels.WARN)
+        return
+    end
+    vim.cmd('botright 15split | terminal ' .. cmd)
+    vim.cmd.startinsert()
+end, { desc = '[R]un current file' })
 local dap = require 'dap'
 local dapui = require 'dapui'
 
