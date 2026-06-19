@@ -12,3 +12,7 @@ spell/
 # nvim-pack-lock.json
 
 .DS_Store
+
+# Secrets — never commit. Holds OVERLEAF_COOKIE for overleaf.nvim.
+.env
+.env.*

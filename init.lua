@@ -671,6 +671,8 @@ do
   pattern = 'markdown',
   callback = function()
     vim.diagnostic.enable(false, { bufnr = 0 })
+    -- Open a new unchecked checkbox item below and stay in insert mode
+    vim.keymap.set('n', '<leader>mc', 'o- [ ] ', { buffer = true, desc = '[M]arkdown unchecked [c]heckbox' })
   end,
 })
     vim.keymap.set({ 'n', 'v' }, '<leader>f', function() require('conform').format { async = true } end, { desc = '[F]ormat buffer' })

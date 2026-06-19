@@ -30,11 +30,11 @@ vim.api.nvim_create_autocmd('PackChanged', {
 vim.pack.add { 'https://github.com/richwomanbtc/overleaf.nvim' }
 
 require('overleaf').setup({
-    -- Path to .env file containing OVERLEAF_COOKIE (default: '.env')
-    env_file = '.env',
-
-    -- Session cookie (overrides .env)
-    cookie = 'overleaf_session2=s%3AQgGNcx-2y7Ve9jaqaILcvA9cv9JQiIBm.PRKspJDvCtqoXJJOqd3rSAn5Isldp7LaN97JK1i1bWM',
+    -- OVERLEAF_COOKIE lives in ~/.config/nvim/.env (gitignored), NOT inline here.
+    -- Absolute path so it's found regardless of cwd (the plugin only searches
+    -- getcwd()/.env and its own root for a *relative* env_file). Leave `cookie`
+    -- unset so the plugin falls through to load_cookie() and reads the .env.
+    env_file = vim.fn.stdpath('config') .. '/.env',
 
     -- Path to Node.js binary (default: 'node')
     node_path = 'node',
@@ -44,7 +44,7 @@ require('overleaf').setup({
 
     -- Local file sync directory for external tools like Claude Code (default: nil = disabled)
     -- When set, all documents are mirrored to disk and external changes are synced back.
-    sync_dir = '~/.overleaf',
+    sync_dir = '~/overleaf',
 
     -- Set to false to disable default keymaps
     keys = true,
