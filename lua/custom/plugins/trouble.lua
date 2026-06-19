@@ -2,8 +2,7 @@
 
 vim.pack.add {
     'https://github.com/folke/trouble.nvim',
-    -- optional, for nicer icons; remove if you don't use a Nerd Font:
-    'https://github.com/nvim-tree/nvim-web-devicons',
+    -- icons are provided by mini.icons (via MiniIcons.mock_nvim_web_devicons in init.lua)
 }
 
 require('trouble').setup {
